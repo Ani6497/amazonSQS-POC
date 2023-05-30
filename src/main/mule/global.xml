@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:sqs="http://www.mulesoft.org/schema/mule/sqs"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/sqs http://www.mulesoft.org/schema/mule/sqs/current/mule-sqs.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<configuration-properties doc:name="Configuration properties" doc:id="dda1006d-74ad-40f0-9230-f6b126c6ca74" file="config.yaml" />
+	<sqs:config name="Amazon_SQS_Configuration" doc:name="Amazon SQS Configuration" doc:id="c205d39b-5d05-4ee4-ab88-0d2581258ee4" >
+		<sqs:basic-connection testQueueArn="arn:aws:sqs:us-east-1:631134110679:EXV-q1" accessKey="${Aws.AmazonAccessKey}" secretKey="${Aws.AmazonSecretAccessKey}" />
+	</sqs:config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="e27ba4c7-0e61-413c-bc70-a1088553cd10" >
+		<http:listener-connection host="${http.host}" port="${http.port}" />
+	</http:listener-config>
+</mule>

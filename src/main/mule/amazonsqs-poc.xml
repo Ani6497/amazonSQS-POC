@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:sqs="http://www.mulesoft.org/schema/mule/sqs"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/sqs http://www.mulesoft.org/schema/mule/sqs/current/mule-sqs.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="CreateQueue" doc:id="6961ca5a-2ef6-4013-9eb6-800caf874213" >
+		<http:listener doc:name="Listener" doc:id="57de1237-1bad-437e-902a-80081d897c21" config-ref="HTTP_Listener_config" path="/createQueue" allowedMethods="GET"/>
+		<sqs:create-queue doc:name="Create queue" doc:id="fa659a1d-ccee-467a-8532-f284c6a7faa8" config-ref="Amazon_SQS_Configuration" queueName="EXV-q1"/>
+		<set-payload value='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	"OutputURL": payload&#10;}]' doc:name="Set Payload" doc:id="6a92807d-fdb7-495f-a7d7-43fbd7e902b4" />
+	</flow>
+	<flow name="SendMessage" doc:id="0a7e7d65-f0ca-42cb-b251-0a17b82db75b" >
+		<http:listener doc:name="Listener" doc:id="80560dbc-a8d5-4467-a740-cf43d971423f" config-ref="HTTP_Listener_config" path="/sendMsg"/>
+		<sqs:send-message doc:name="Send message" doc:id="f9420b4a-bdc0-42f4-81b5-e402590efc5e" config-ref="Amazon_SQS_Configuration" queueUrl="https://sqs.us-east-1.amazonaws.com/631134110679/EXV-q1">
+			<sqs:message ><![CDATA[#[{
+	body: write(payload, 'application/json')
+}]]]></sqs:message>
+		</sqs:send-message>
+		<logger level="INFO" doc:name="Logger" doc:id="ee9aa5c9-ff20-4942-936a-75eee7293599" message='#[output application/json&#10;---&#10;{&#10;	"where": "Just Sent",&#10;	"Date": now()&#10;}]'/>
+		<ee:transform doc:name="Transform Message" doc:id="dda4a74f-8107-4c96-ba26-3cf203293eac" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "OK",
+	"corrId": correlationId
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="ReceiveMsgSub1" doc:id="b58b21ec-b51c-4afe-9df3-bd567051901e" >
+		<sqs:receivemessages doc:name="Receive messages" doc:id="98232af3-00c9-45bc-9932-efdbb08dd55f" config-ref="Amazon_SQS_Configuration" queueUrl="https://sqs.us-east-1.amazonaws.com/631134110679/EXV-q1"/>
+		<ee:transform doc:name="Transform Message" doc:id="0b27ff70-16dc-4d8a-881a-b5a09a995a40" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+read(payload, 'application/json')]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="0e9e2103-6a19-465a-aaf5-d4394e8a70d5" message='#[output application/json&#10;---&#10;{&#10;	"where": "Just Sent",&#10;	"Date": now(),&#10;	"Subscriber": "Sub1",&#10;	"what": payload&#10;}]'/>
+	</flow>
+	<flow name="ReceiveMsgSub2" doc:id="46fe1573-35ce-4524-a537-19258346ad56" >
+		<sqs:receivemessages doc:name="Receive messages" doc:id="694ddcc6-9a97-4b86-8ec5-387074c9f4ad" config-ref="Amazon_SQS_Configuration" queueUrl="https://sqs.us-east-1.amazonaws.com/631134110679/EXV-q1"/>
+		<ee:transform doc:name="Transform Message" doc:id="6e14951f-a3b3-4b5c-925d-41dae13a9de8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+read(payload, 'application/json')]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="379fe8a4-fde4-437d-95e1-0664292a5f15" message='#[output application/json&#10;---&#10;{&#10;	"where": "Just Sent",&#10;	"Date": now(),&#10;	"Subscriber": "Sub2",&#10;	"what": payload&#10;}]'/>
+	</flow>
+</mule>

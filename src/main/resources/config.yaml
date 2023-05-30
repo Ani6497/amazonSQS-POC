@@ -1,0 +1,7 @@
+Aws:
+  AmazonAccessKey: "AKIAZF4UGIPL5ZIEMPGI"
+  AmazonSecretAccessKey: "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"
+  
+http:
+  host: "localhost"
+  port: "8081"
